@@ -9,12 +9,19 @@ app.get('/', function(req, res){
 var client = 0;
 io.on('connection', function(socket){
   client++;
-  io.emit('newclientconnect', {message: ` ${client} connected`});
+  io.emit('newclientconnect', {message: ` ${client} user online`});
 
-  socket.on('chat message', function(msg){
+    socket.on('chat message', function(msg){
       console.log("chat received");
       io.emit('chat message', msg);
     });
+
+    
+    socket.on('disconnect', function() {
+      client--;
+      socket.broadcast.emit('userdisconnect', {message: 'one user disconnected'});
+    });
+
   });
 
 http.listen(3000, function(){

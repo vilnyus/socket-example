@@ -20,7 +20,7 @@
         <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     </head>
     <body>
-        <ul id="welcome"></ul>
+        <p id="welcome"></p>
         <ul id="messages"></ul>
         <form action="">
           <input id="m" autocomplete="off" /><button>Send</button>
@@ -34,12 +34,14 @@
               return false;
             });
             socket.on('chat message', function(msg){
-               $('#messages').append($('<li>').text(msg));
-               window.scrollTo(0, document.body.scrollHeight);
+              $('#messages').append($('<li>').text(msg));
+              window.scrollTo(0, document.body.scrollHeight);
             });
             socket.on('newclientconnect', function(msg){
-              $('#welcome').append($('<li>').text(msg.message));
-              window.scrollTo(0, document.body.scrollHeight);
+              $('#welcome').text(msg.message);
+            });
+            socket.on('userdisconnect', function(msg){
+              $('#welcome').text(msg.message);
             });
           });
         </script>

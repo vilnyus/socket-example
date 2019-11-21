@@ -2,28 +2,26 @@ var app = require('express')();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 
+var nameSpaceWeek = io.of("/week");
+var nameSpaceDay = io.of("/day");
+
 app.get('/', function(req, res){
     res.sendFile(__dirname + '/index.html');
 });
 
-var client = 0;
-io.on('connection', function(socket){
-  client++;
-  io.emit('newclientconnect', {message: ` ${client} user online`});
+io.on("connection", function(socket){
+  console.log("User = " + socket.id);
+});
 
-    socket.on('chat message', function(msg){
-      console.log("chat received");
-      io.emit('chat message', msg);
-    });
+nameSpaceDay.on("connection", function(socket){
+  nameSpaceDay.emit("dayInfo", "This day.");
+});
 
-    
-    socket.on('disconnect', function() {
-      client--;
-      socket.broadcast.emit('userdisconnect', {message: 'one user disconnected'});
-    });
+nameSpaceWeek.on("connection", function(socket){
+  nameSpaceWeek.emit("weekInfo", "This week.");
+});
 
-  });
-
+ 
 http.listen(3000, function(){
     console.log("Listening on port: 3000");
 });

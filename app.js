@@ -1,28 +1,35 @@
-var app = require('express')();
-var http = require('http').createServer(app);
-var io = require('socket.io')(http);
+const app = require('express')();
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+const port = 3000;
 
-var nameSpaceWeek = io.of("/week");
-var nameSpaceDay = io.of("/day");
+server.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
 
-app.get('/', function(req, res){
+app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
-io.on("connection", function(socket){
-  console.log("User = " + socket.id);
-});
+// tech namespace
+const tech = io.of('/tech');
 
-nameSpaceDay.on("connection", function(socket){
-  nameSpaceDay.emit("dayInfo", "This day.");
-});
+tech.on('connection', (socket) => {
+  console.log("connected 1");
+    socket.on('join', (data) => {
+      console.log("connected 3");
+        socket.join(data.room);
+        tech.in(data.room).emit('message', `New user joined ${data.room} room!`);
+    })
 
-nameSpaceWeek.on("connection", function(socket){
-  nameSpaceWeek.emit("weekInfo", "This week.");
-});
+    socket.on('message', (data) => {
+        console.log(`message: ${data.msg}`);
+        tech.in(data.room).emit('message', data.msg);
+    });
 
- 
-http.listen(3000, function(){
-    console.log("Listening on port: 3000");
-});
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
 
+        tech.emit('message', 'user disconnected');
+    })
+})
